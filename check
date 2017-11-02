@@ -3,6 +3,8 @@
 EXIT_STATUS=0
 
 printf "TEST LOG:\n\n" > ./log.txt
+rm -f .coverage
+
 for t in ./tc_*.py
 do
     declare cov=${t#./tc_}; cov=".coverage_${cov%.py}"
