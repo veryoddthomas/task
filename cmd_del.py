@@ -5,7 +5,7 @@ from runner import *
 
 
 def process_command(args):
-    print args
+    print(args)
 
 
 def create_parser(subparsers):

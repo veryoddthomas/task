@@ -1,6 +1,5 @@
-import cmd_add
-import cmd_del
 import argparse
+import os
 try:
     import argcomplete
 except ImportError:
@@ -20,7 +19,16 @@ version = "1.0.0"
 #             json.dump(settings, settings_file, sort_keys=True, indent=4, separators=(',', ': '))
 
 
-def create_command_line_parser():
+def find_commands():
+    all_commands = []
+    for (_, _, filenames) in os.walk("."):
+        filenames = [f for f in filenames if f.startswith("cmd_") and f.endswith(".py")]
+        c = [f[:-3] for f in filenames]
+        all_commands.extend(c)
+    return all_commands
+
+
+def create_command_line_parser(modules):
     global version
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version', version='%(prog)s version {}'.format(version))
@@ -28,8 +36,10 @@ def create_command_line_parser():
                         help="increase output verbosity")
     subparsers = parser.add_subparsers(title="commands", metavar=None)  # "<command>")
 
-    cmd_add.create_parser(subparsers)
-    cmd_del.create_parser(subparsers)
+    # cmd_add.create_parser(subparsers)
+    # cmd_del.create_parser(subparsers)
+    for m in modules:
+        m.create_parser(subparsers)
 
     if argcomplete:
         argcomplete.autocomplete(parser)
@@ -37,19 +47,25 @@ def create_command_line_parser():
 
 
 def main(params):
-    p = create_command_line_parser()
+    commands = find_commands()
+    command_modules = []
+    for command in commands:
+        new_module = __import__(command)
+        command_modules.append(new_module)
+
+    p = create_command_line_parser(command_modules)
     parsed_args = p.parse_args(params)
 
     # if parsed_args.verbosity > 0:
     #     print "Verbosity: {}".format(parsed_args.verbosity)
     #updater = update.Updater()
     #updater.update()
-    #initialize_settings("$HOME/.swe/settings")
+    #initialize_settings("$HOME/.task/settings")
 
     retval = 0
     try:
         parsed_args.func(parsed_args)
-    except ExceptionCommandFailed:
+    except Exception:
         retval = 1
 
     return retval

@@ -18,7 +18,7 @@ def run_long_command(command, input_text=None, env=None, cwd='.', host=None):
     while True:
         line = p.stdout.readline()
         stdout.append(line)
-        print line,
+        print(line, end='')
         if line == '' and p.poll() != None:
             break
     output = ''.join(stdout)
