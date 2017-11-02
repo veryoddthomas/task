@@ -13,7 +13,8 @@ def identify(testobj):
 
 # @patch('os.path.exists')
 # @patch('os.makedirs')
-# def test_store_symbols_create_directory_fails(self, mock_makedirs, mock_path_exists):
+# def test_store_symbols_create_directory_fails(
+#     self, mock_makedirs, mock_path_exists):
 #     mock_path_exists.return_value = False
 #     mock_makedirs.side_effect = os.error
 #     succeeded = self.symbol_db.store_symbols(
@@ -38,13 +39,11 @@ class TestAdd(unittest.TestCase):
         self.task = cmd_add.Task('Build')
         print("task id = {}".format(self.task.id))
         print("task type = {}".format(self.task.type))
-        #self.assertEqual(0, self.task.id)
 
     def test_add_2(self):
         self.task = cmd_add.Task('Test')
         print("task id = {}".format(self.task.id))
         print("task type = {}".format(self.task.type))
-        #self.assertEqual(1, self.task.id)
 
 
 if __name__ == '__main__':

@@ -5,6 +5,21 @@ EXIT_STATUS=0
 printf "TEST LOG:\n\n" > ./log.txt
 rm -f .coverage
 
+pep8 ./*.py
+EXIT_STATUS=$?
+
+if [ $EXIT_STATUS -ne 0 ]; then
+    if [[ -n ${USE_BANNER} ]]; then
+        figlet -f banner PEP-8 FAILED
+    else
+        printf "\nPEP-8 FAILED\n\n"
+    fi
+    exit $EXIT_STATUS
+fi
+
+pylint -rn --disable=C0325,W1201 --msg-template='{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}' ./*.py
+
+
 for t in ./tc_*.py
 do
     declare cov=${t#./tc_}; cov=".coverage_${cov%.py}"

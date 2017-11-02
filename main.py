@@ -1,3 +1,5 @@
+"""Task Manager"""
+
 import argparse
 import os
 try:
@@ -16,13 +18,15 @@ version = "1.0.0"
 #             settings = json.load(settings_file)
 #     else:
 #         with open(settings_file_name, "w+") as settings_file:
-#             json.dump(settings, settings_file, sort_keys=True, indent=4, separators=(',', ': '))
+#             json.dump(settings, settings_file, sort_keys=True, indent=4,
+#                       separators=(',', ': '))
 
 
 def find_commands():
     all_commands = []
     for (_, _, filenames) in os.walk("."):
-        filenames = [f for f in filenames if f.startswith("cmd_") and f.endswith(".py")]
+        filenames = [f for f in filenames
+                     if f.startswith("cmd_") and f.endswith(".py")]
         c = [f[:-3] for f in filenames]
         all_commands.extend(c)
     return all_commands
@@ -31,10 +35,11 @@ def find_commands():
 def create_command_line_parser(modules):
     global version
     parser = argparse.ArgumentParser()
-    parser.add_argument('--version', action='version', version='%(prog)s version {}'.format(version))
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s version {}'.format(version))
     parser.add_argument("-v", "--verbosity", action="count", default=0,
                         help="increase output verbosity")
-    subparsers = parser.add_subparsers(title="commands", metavar=None)  # "<command>")
+    subparsers = parser.add_subparsers(title="commands", metavar=None)
 
     # cmd_add.create_parser(subparsers)
     # cmd_del.create_parser(subparsers)
@@ -58,9 +63,10 @@ def main(params):
 
     # if parsed_args.verbosity > 0:
     #     print "Verbosity: {}".format(parsed_args.verbosity)
-    #updater = update.Updater()
-    #updater.update()
-    #initialize_settings("$HOME/.task/settings")
+
+    # updater = update.Updater()
+    # updater.update()
+    # initialize_settings("$HOME/.task/settings")
 
     retval = 0
     try:
