@@ -1,0 +1,6 @@
+.idea/
+.coverage*
+log.txt
+__pycache__/
+*.pyc
+README.html

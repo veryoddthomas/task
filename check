@@ -1,0 +1,42 @@
+#!/bin/bash
+
+EXIT_STATUS=0
+
+printf "TEST LOG:\n\n" > ./log.txt
+for t in ./tc_*.py
+do
+    declare cov=${t#./tc_}; cov=".coverage_${cov%.py}"
+    printf "TEST: $t\n"
+    COVERAGE_FILE=${cov} coverage run $t >> ./log.txt|| EXIT_STATUS=$?
+done
+
+if [ $EXIT_STATUS -eq 0 ]; then
+    # SUCCESS
+    if [[ -n ${USE_BANNER} ]]; then
+        banner PASSED
+    else
+        printf "\nTESTS PASSED\n\n"
+    fi
+    # Report coverage
+    coverage combine .coverage_*
+    coverage report -m --omit='*site-packages*,*dist-packages*'
+
+    # Alert user, if say enabled.
+    # todo: set up for espeak on Linux
+    if [[ -n ${USE_SAY} ]]; then
+        lastline=$(coverage report -m --omit='*site-packages*,*dist-packages*' | tail -1)
+        lastlinewords=($lastline)
+        coverage=${lastlinewords[3]}
+        (say "Hell yes, the tests all passed and total test coverage is ${coverage}" &);
+    fi
+else
+    # FAILURE
+    if [[ -n ${USE_BANNER} ]]; then
+        banner FAILED
+    else
+        printf "\nTESTS FAILED\n\n"
+    fi
+    if [[ -n ${USE_SAY} ]]; then
+        (say "Dammit, the code's broke" &);
+    fi
+fi
