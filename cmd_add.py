@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 
-import uuid
+"""
+Command to add a task
+"""
 
-
-class Task:
-    def __init__(self, task_type):
-        self.id = uuid.uuid4()
-        self.type = task_type
+import taskinfo
 
 
 def process_command(args):
-    task = Task(args.type)
+    """Process sub-command 'add'"""
+    task = taskinfo.TaskInfo(args.type)
     print("task id = {}".format(task.id))
     print("task type = {}".format(task.type))
     print(args)
 
 
 def create_parser(subparsers):
+    """Create argument subparser for command 'add'"""
     subparser = subparsers.add_parser('add', help='Add task')
     subparser.set_defaults(func=process_command)
     subparser.add_argument("-t", "--type", help="type of task",
