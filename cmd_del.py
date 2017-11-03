@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-
-
 def process_command(args):
     print(args)
 
