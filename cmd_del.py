@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-from runner import *
 
 
 def process_command(args):

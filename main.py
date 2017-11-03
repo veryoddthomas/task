@@ -1,12 +1,15 @@
 """Task Manager"""
 
+import logging
+logging.basicConfig()
+logger = logging.getLogger('task')
+logger.setLevel(logging.INFO)
 import argparse
 import os
 try:
     import argcomplete
 except ImportError:
     argcomplete = None
-
 
 version = "1.0.0"
 
@@ -24,7 +27,8 @@ version = "1.0.0"
 
 def find_commands():
     all_commands = []
-    for (_, _, filenames) in os.walk("."):
+    for (_, _, filenames) in os.walk(os.path.dirname(
+            os.path.realpath(__file__))):
         filenames = [f for f in filenames
                      if f.startswith("cmd_") and f.endswith(".py")]
         c = [f[:-3] for f in filenames]
@@ -60,6 +64,12 @@ def main(params):
 
     p = create_command_line_parser(command_modules)
     parsed_args = p.parse_args(params)
+
+    if parsed_args.verbosity > 0:
+        logger.setLevel(logging.DEBUG)
+
+    logger.debug("logmsg")
+    logger.info("Log level = {}".format(logger.getEffectiveLevel()))
 
     # if parsed_args.verbosity > 0:
     #     print "Verbosity: {}".format(parsed_args.verbosity)
