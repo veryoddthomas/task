@@ -1,9 +1,11 @@
 """Task Manager"""
 
-import logging
-logging.basicConfig()
-logger = logging.getLogger('task')
-logger.setLevel(logging.INFO)
+from custom_logger import *
+
+#import logging
+#logging.basicConfig()
+#logger = logging.getLogger('task')
+#logger.setLevel(logging.INFO)
 import argparse
 import os
 try:
@@ -68,8 +70,14 @@ def main(params):
     if parsed_args.verbosity > 0:
         logger.setLevel(logging.DEBUG)
 
-    logger.debug("logmsg")
-    logger.info("Log level = {}".format(logger.getEffectiveLevel()))
+    # logger.debug("logmsg")
+    # logger.info("Log level = {}".format(logger.getEffectiveLevel()))
+
+    log = get_logger('task')
+    log.error("error")
+    log.info("info")
+    log.debug("debug")
+
 
     # if parsed_args.verbosity > 0:
     #     print "Verbosity: {}".format(parsed_args.verbosity)
