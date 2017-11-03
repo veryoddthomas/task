@@ -1,46 +1,55 @@
 #!/usr/bin/env python
 
+"""
+Custom logging support.  Enables level-specific formatting.
+"""
+
 import sys
 import logging
 import logging.config
 from ansi_color import TermColor
 
-color = TermColor()
+COLOR = TermColor()
+
+if not COLOR.strip_codes:
+    COLOR_START_MARKER = '${color_start}'
+    COLOR_END_MARKER = '${color_end}'
+else:
+    COLOR_START_MARKER = ''
+    COLOR_END_MARKER = ''
 
 
 class MyFormatter(logging.Formatter):
+    """Custom color-enabled formatter for our logging"""
     def __init__(self, fmt="%(levelno)s: %(msg)s", datefmt=None):
         self.datefmt = datefmt
         logging.Formatter.__init__(self, fmt, datefmt)
 
     def format(self, record):
         result = super(MyFormatter, self).format(record)
-        if not color.strip_codes:
+        if not COLOR.strip_codes:
             if record.levelno == logging.DEBUG:
-                result = result.replace("${color_start}", color.dark_white())
+                result = result.replace(COLOR_START_MARKER, COLOR.dark_white())
             elif record.levelno == logging.INFO:
-                result = result.replace("${color_start}", color.light_white())
+                result = result.replace(COLOR_START_MARKER, COLOR.light_white())
             elif record.levelno == logging.ERROR:
-                result = result.replace("${color_start}", color.light_red())
+                result = result.replace(COLOR_START_MARKER, COLOR.light_red())
+        result = result.replace(COLOR_END_MARKER, COLOR.end())
         return result
 
 
-if not color.strip_codes:
-    color_start_marker = '${color_start}'
-else:
-    color_start_marker = ''
-
-formatter = MyFormatter(color_start_marker +
+FORMATTER = MyFormatter(COLOR_START_MARKER +
                         '%(asctime)-15s %(name)s[%(levelname)s]' +
-                        color.end() +
+                        COLOR_END_MARKER +
                         ' %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(formatter)
-logging.root.addHandler(handler)
+HANDLER = logging.StreamHandler(sys.stdout)
+HANDLER.setFormatter(FORMATTER)
+logging.root.addHandler(HANDLER)
 logging.root.setLevel(logging.DEBUG)
 
 
 def get_logger(logger_name):
+    """Function to get default logger for this application"""
     return logging.getLogger(logger_name)
