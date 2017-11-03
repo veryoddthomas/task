@@ -18,13 +18,22 @@ if [ $EXIT_STATUS -ne 0 ]; then
 fi
 
 pylint -rn --disable=C0325,W1201 --msg-template='{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}' ./*.py
+EXIT_STATUS=$?
 
+if [ $EXIT_STATUS -ne 0 ]; then
+    if [[ -n ${USE_BANNER} ]]; then
+        figlet -f banner PYLINT FAILED
+    else
+        printf "\nPYLINT FAILED\n\n"
+    fi
+    exit $EXIT_STATUS
+fi
 
 for t in ./tc_*.py
 do
     declare cov=${t#./tc_}; cov=".coverage_${cov%.py}"
     printf "TEST: $t\n"
-    COVERAGE_FILE=${cov} coverage run $t >> ./log.txt|| EXIT_STATUS=$?
+    COVERAGE_FILE=${cov} coverage run $t >> ./log.txt || EXIT_STATUS=$?
 done
 
 if [ $EXIT_STATUS -eq 0 ]; then
