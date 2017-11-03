@@ -1,7 +1,5 @@
 """Task Manager main module"""
 
-from custom_logger import get_logger
-
 # import logging
 # logging.basicConfig()
 # logger = logging.getLogger('task')
@@ -12,6 +10,8 @@ try:
     import argcomplete
 except ImportError:
     argcomplete = None
+
+from custom_logger import get_logger
 
 version = "1.0.0"
 
@@ -33,16 +33,16 @@ def find_commands():
     all_commands = []
     for (_, _, filenames) in os.walk(os.path.dirname(
             os.path.realpath(__file__))):
-        filenames = [f for f in filenames
-                     if f.startswith("cmd_") and f.endswith(".py")]
-        c = [f[:-3] for f in filenames]
-        all_commands.extend(c)
+        filenames = [filename for filename in filenames
+                     if filename.startswith("cmd_") and
+                     filename.endswith(".py")]
+        commands = [filename[:-3] for filename in filenames]
+        all_commands.extend(commands)
     return all_commands
 
 
 def create_command_line_parser(modules):
     """Create top level command-line parser"""
-    global version
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version',
                         version='%(prog)s version {}'.format(version))
@@ -52,8 +52,8 @@ def create_command_line_parser(modules):
 
     # cmd_add.create_parser(subparsers)
     # cmd_del.create_parser(subparsers)
-    for m in modules:
-        m.create_parser(subparsers)
+    for module in modules:
+        module.create_parser(subparsers)
 
     if argcomplete:
         argcomplete.autocomplete(parser)
@@ -68,19 +68,16 @@ def main(params):
         new_module = __import__(command)
         command_modules.append(new_module)
 
-    p = create_command_line_parser(command_modules)
-    parsed_args = p.parse_args(params)
-
-    if parsed_args.verbosity > 0:
-        logger.setLevel(logging.DEBUG)
-
-    # logger.debug("logmsg")
-    # logger.info("Log level = {}".format(logger.getEffectiveLevel()))
+    parser = create_command_line_parser(command_modules)
+    parsed_args = parser.parse_args(params)
 
     log = get_logger('task')
     log.error("error")
     log.info("info")
     log.debug("debug")
+
+    # logger.debug("logmsg")
+    # logger.info("Log level = {}".format(logger.getEffectiveLevel()))
 
     # if parsed_args.verbosity > 0:
     #     print "Verbosity: {}".format(parsed_args.verbosity)
@@ -92,7 +89,7 @@ def main(params):
     retval = 0
     try:
         parsed_args.func(parsed_args)
-    except Exception:
+    except RuntimeError:
         retval = 1
 
     return retval

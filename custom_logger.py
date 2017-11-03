@@ -29,11 +29,14 @@ class MyFormatter(logging.Formatter):
         result = super(MyFormatter, self).format(record)
         if not COLOR.strip_codes:
             if record.levelno == logging.DEBUG:
-                result = result.replace(COLOR_START_MARKER, COLOR.dark_white())
+                result = result.replace(COLOR_START_MARKER,
+                                        COLOR.dark_white())
             elif record.levelno == logging.INFO:
-                result = result.replace(COLOR_START_MARKER, COLOR.light_white())
+                result = result.replace(COLOR_START_MARKER,
+                                        COLOR.light_white())
             elif record.levelno == logging.ERROR:
-                result = result.replace(COLOR_START_MARKER, COLOR.light_red())
+                result = result.replace(COLOR_START_MARKER,
+                                        COLOR.light_red())
         result = result.replace(COLOR_END_MARKER, COLOR.end())
         return result
 
@@ -44,6 +47,7 @@ FORMATTER = MyFormatter(COLOR_START_MARKER +
                         ' %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
+logging.basicConfig()
 HANDLER = logging.StreamHandler(sys.stdout)
 HANDLER.setFormatter(FORMATTER)
 logging.root.addHandler(HANDLER)

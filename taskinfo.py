@@ -14,12 +14,12 @@ class TaskInfo:
         self.type = task_type
         self.priority = DEFAULT_TASK_PRIORITY
 
-    def set_priority(self):
+    def set_priority(self):  # pylint: disable=no-self-use
         """Load task from persistent storage"""
         # TBD
         return
 
-    def store(self):
+    def store(self):  # pylint: disable=no-self-use
         """Store task to persistent storage"""
         # TBD
         return

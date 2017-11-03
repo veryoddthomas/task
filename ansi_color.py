@@ -232,6 +232,7 @@ class TermColor(object):
 
 
 if __name__ == '__main__':
+    # pylint: disable=fixme
     # TODO: move this to a proper unit test
     TERM_COLOR = TermColor()
     print(TERM_COLOR.light_black() + "HELLO FG LIGHT BLACK" + TERM_COLOR.end())
