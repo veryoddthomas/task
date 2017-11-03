@@ -1,6 +1,6 @@
-"""Task Manager"""
+"""Task Manager main module"""
 
-from custom_logger import *
+from custom_logger import get_logger
 
 # import logging
 # logging.basicConfig()
@@ -28,6 +28,8 @@ version = "1.0.0"
 
 
 def find_commands():
+    """Dynamically discover cmd_*.py files and return the list of names
+       to import"""
     all_commands = []
     for (_, _, filenames) in os.walk(os.path.dirname(
             os.path.realpath(__file__))):
@@ -39,6 +41,7 @@ def find_commands():
 
 
 def create_command_line_parser(modules):
+    """Create top level command-line parser"""
     global version
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version',
@@ -58,6 +61,7 @@ def create_command_line_parser(modules):
 
 
 def main(params):
+    """Create top level command-line parser"""
     commands = find_commands()
     command_modules = []
     for command in commands:
