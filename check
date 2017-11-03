@@ -5,7 +5,7 @@ EXIT_STATUS=0
 printf "TEST LOG:\n\n" > ./log.txt
 rm -f .coverage
 
-pep8 ./*.py
+pycodestyle ./*.py
 EXIT_STATUS=$?
 
 if [ $EXIT_STATUS -ne 0 ]; then

@@ -2,10 +2,10 @@
 
 from custom_logger import *
 
-#import logging
-#logging.basicConfig()
-#logger = logging.getLogger('task')
-#logger.setLevel(logging.INFO)
+# import logging
+# logging.basicConfig()
+# logger = logging.getLogger('task')
+# logger.setLevel(logging.INFO)
 import argparse
 import os
 try:
@@ -77,7 +77,6 @@ def main(params):
     log.error("error")
     log.info("info")
     log.debug("debug")
-
 
     # if parsed_args.verbosity > 0:
     #     print "Verbosity: {}".format(parsed_args.verbosity)

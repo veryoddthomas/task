@@ -30,7 +30,10 @@ if not color.strip_codes:
 else:
     color_start_marker = ''
 
-formatter = MyFormatter(color_start_marker+'%(asctime)-15s %(name)s[%(levelname)s]'+color.end()+' %(message)s',
+formatter = MyFormatter(color_start_marker +
+                        '%(asctime)-15s %(name)s[%(levelname)s]' +
+                        color.end() +
+                        ' %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
 handler = logging.StreamHandler(sys.stdout)
