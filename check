@@ -9,11 +9,7 @@ pycodestyle ./*.py
 EXIT_STATUS=$?
 
 if [ $EXIT_STATUS -ne 0 ]; then
-    if [[ -n ${USE_BANNER} ]]; then
-        figlet -f banner PEP-8 FAILED
-    else
-        printf "\nPEP-8 FAILED\n\n"
-    fi
+    printf "\nPYCODESTYLE (PEP-8) FAILED\n\n"
     exit $EXIT_STATUS
 fi
 
@@ -21,11 +17,7 @@ pylint -rn --disable=C0325,W1201 --msg-template='{path}:{line}: [{msg_id}({symbo
 EXIT_STATUS=$?
 
 if [ $EXIT_STATUS -ne 0 ]; then
-    if [[ -n ${USE_BANNER} ]]; then
-        figlet -f banner PYLINT FAILED
-    else
-        printf "\nPYLINT FAILED\n\n"
-    fi
+    printf "\nPYLINT FAILED\n\n"
     exit $EXIT_STATUS
 fi
 
@@ -47,22 +39,11 @@ if [ $EXIT_STATUS -eq 0 ]; then
     coverage combine .coverage_*
     coverage report -m --omit='*site-packages*,*dist-packages*'
 
-    # Alert user, if say enabled.
-    # todo: set up for espeak on Linux
-    if [[ -n ${USE_SAY} ]]; then
-        lastline=$(coverage report -m --omit='*site-packages*,*dist-packages*' | tail -1)
-        lastlinewords=($lastline)
-        coverage=${lastlinewords[3]}
-        (say "Hell yes, the tests all passed and total test coverage is ${coverage}" &);
-    fi
 else
     # FAILURE
     if [[ -n ${USE_BANNER} ]]; then
         figlet -f banner TESTS FAILED
     else
         printf "\nTESTS FAILED\n\n"
-    fi
-    if [[ -n ${USE_SAY} ]]; then
-        (say "Dammit, the code's broke" &);
     fi
 fi
