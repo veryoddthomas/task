@@ -9,8 +9,9 @@ DEFAULT_TASK_PRIORITY = 3
 
 class TaskInfo:
     """Stores all information about a task"""
-    def __init__(self, task_type):
+    def __init__(self, description, task_type):
         self.id = uuid.uuid4()
+        self.description = description
         self.type = task_type
         self.priority = DEFAULT_TASK_PRIORITY
 

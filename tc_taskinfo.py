@@ -45,15 +45,17 @@ class TestTaskInfo(unittest.TestCase):
 
     def test_taskinfo_add_build(self):
         """Test TaskInfo creation for a Build task"""
-        self.task = taskinfo.TaskInfo('Build')
+        self.task = taskinfo.TaskInfo('Do the first thing', 'Build')
         print("task id = {}".format(self.task.id))
         print("task type = {}".format(self.task.type))
+        self.assertEqual(self.task.description, 'Do the first thing')
 
     def test_taskinfo_add_test(self):
         """Test TaskInfo creation for a Test task"""
-        self.task = taskinfo.TaskInfo('Test')
+        self.task = taskinfo.TaskInfo('Do the second thing', 'Test')
         print("task id = {}".format(self.task.id))
         print("task type = {}".format(self.task.type))
+        self.assertEqual(self.task.description, 'Do the second thing')
 
 
 # class TestAdd(unittest.TestCase):
