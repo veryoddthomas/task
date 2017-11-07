@@ -4,6 +4,7 @@
 # logging.basicConfig()
 # logger = logging.getLogger('task')
 # logger.setLevel(logging.INFO)
+
 import argparse
 import os
 try:
@@ -12,6 +13,7 @@ except ImportError:
     argcomplete = None
 
 from custom_logger import get_logger
+log = get_logger('task')
 
 version = "1.0.0"
 
@@ -50,8 +52,6 @@ def create_command_line_parser(modules):
                         help="increase output verbosity")
     subparsers = parser.add_subparsers(title="commands", metavar=None)
 
-    # cmd_add.create_parser(subparsers)
-    # cmd_del.create_parser(subparsers)
     for module in modules:
         module.create_parser(subparsers)
 
@@ -70,17 +70,6 @@ def main(params):
 
     parser = create_command_line_parser(command_modules)
     parsed_args = parser.parse_args(params)
-
-    log = get_logger('task')
-    log.error("This is an error message")
-    log.info("This is an info message")
-    log.debug("This is a debug message")
-
-    # logger.debug("logmsg")
-    # logger.info("Log level = {}".format(logger.getEffectiveLevel()))
-
-    # if parsed_args.verbosity > 0:
-    #     print "Verbosity: {}".format(parsed_args.verbosity)
 
     # updater = update.Updater()
     # updater.update()

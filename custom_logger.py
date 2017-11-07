@@ -37,9 +37,18 @@ class MyFormatter(logging.Formatter):
             elif record.levelno == logging.INFO:
                 result = result.replace(COLOR_START_MARKER,
                                         COLOR.light_blue)
+            elif record.levelno == logging.WARNING:
+                result = result.replace(COLOR_START_MARKER,
+                                        COLOR.light_yellow)
             elif record.levelno == logging.ERROR:
                 result = result.replace(COLOR_START_MARKER,
                                         COLOR.light_red)
+            elif record.levelno == logging.CRITICAL:
+                result = result.replace(COLOR_START_MARKER,
+                                        COLOR.light_red)
+            else:
+                result = result.replace(COLOR_START_MARKER,
+                                        COLOR.dark_white)
         result = result.replace(COLOR_END_MARKER, COLOR.end())
         return result
 
