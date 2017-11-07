@@ -102,130 +102,162 @@ class TermColor(object):
             return ""
         return '\033[{}m'.format(RESET)
 
+    @property
     def dark_black(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(BLACK))
 
+    @property
     def dark_red(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(RED))
 
+    @property
     def dark_green(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(GREEN))
 
+    @property
     def dark_yellow(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(YELLOW))
 
+    @property
     def dark_blue(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(BLUE))
 
+    @property
     def dark_magenta(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(MAGENTA))
 
+    @property
     def dark_cyan(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(CYAN))
 
+    @property
     def dark_white(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(fg(WHITE))
 
+    @property
     def light_black(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(BLACK)))
 
+    @property
     def light_red(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(RED)))
 
+    @property
     def light_green(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(GREEN)))
 
+    @property
     def light_yellow(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(YELLOW)))
 
+    @property
     def light_blue(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(BLUE)))
 
+    @property
     def light_magenta(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(MAGENTA)))
 
+    @property
     def light_cyan(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(CYAN)))
 
+    @property
     def light_white(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(fg(WHITE)))
 
+    @property
     def dark_black_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(BLACK))
 
+    @property
     def dark_red_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(RED))
 
+    @property
     def dark_green_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(GREEN))
 
+    @property
     def dark_yellow_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(YELLOW))
 
+    @property
     def dark_blue_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(BLUE))
 
+    @property
     def dark_magenta_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(MAGENTA))
 
+    @property
     def dark_cyan_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(CYAN))
 
+    @property
     def dark_white_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(bg(WHITE))
 
+    @property
     def light_black_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(BLACK)))
 
+    @property
     def light_red_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(RED)))
 
+    @property
     def light_green_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(GREEN)))
 
+    @property
     def light_yellow_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(YELLOW)))
 
+    @property
     def light_blue_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(BLUE)))
 
+    @property
     def light_magenta_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(MAGENTA)))
 
+    @property
     def light_cyan_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(CYAN)))
 
+    @property
     def light_white_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(WHITE)))
@@ -235,10 +267,10 @@ if __name__ == '__main__':
     # pylint: disable=fixme
     # TODO: move this to a proper unit test
     TERM_COLOR = TermColor()
-    print(TERM_COLOR.light_black() + "HELLO FG LIGHT BLACK" + TERM_COLOR.end())
-    print(TERM_COLOR.light_red() + "HELLO FG LIGHT RED" + TERM_COLOR.end())
+    print(TERM_COLOR.light_black + "HELLO FG LIGHT BLACK" + TERM_COLOR.end())
+    print(TERM_COLOR.light_red + "HELLO FG LIGHT RED" + TERM_COLOR.end())
 
-    print(TERM_COLOR.light_yellow() + TERM_COLOR.light_black_bg() +
+    print(TERM_COLOR.light_yellow + TERM_COLOR.light_black_bg +
           "HELLO - FG LIGHT YELLOW - BG LIGHT BLACK" + TERM_COLOR.end())
-    print(TERM_COLOR.light_red() + TERM_COLOR.light_black_bg() +
+    print(TERM_COLOR.light_red + TERM_COLOR.light_black_bg +
           "HELLO - FG LIGHT RED - BG LIGHT BLACK" + TERM_COLOR.end())

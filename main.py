@@ -72,9 +72,9 @@ def main(params):
     parsed_args = parser.parse_args(params)
 
     log = get_logger('task')
-    log.error("error")
-    log.info("info")
-    log.debug("debug")
+    log.error("This is an error message")
+    log.info("This is an info message")
+    log.debug("This is a debug message")
 
     # logger.debug("logmsg")
     # logger.info("Log level = {}".format(logger.getEffectiveLevel()))

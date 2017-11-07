@@ -5,14 +5,17 @@ Command to add a task
 """
 
 import taskinfo
+from custom_logger import get_logger
+
+# log = get_logger('task')
 
 
 def process_command(args):
     """Process sub-command 'add'"""
     task = taskinfo.TaskInfo(args.summary, args.type)
-    print("task id = {}".format(task.id))
-    print("task type = {}".format(task.type))
-    print(args)
+    log = get_logger('task')
+    log.info("task id = %s" % task.id)
+    log.info("task type = %s" % task.type)
 
 
 def create_parser(subparsers):

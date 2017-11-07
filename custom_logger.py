@@ -4,9 +4,12 @@
 Custom logging support.  Enables level-specific formatting.
 """
 
-import sys
 import logging
 import logging.config
+# logging.basicConfig()
+
+
+import sys
 from ansi_color import TermColor
 
 COLOR = TermColor()
@@ -30,13 +33,13 @@ class MyFormatter(logging.Formatter):
         if not COLOR.strip_codes:
             if record.levelno == logging.DEBUG:
                 result = result.replace(COLOR_START_MARKER,
-                                        COLOR.dark_white())
+                                        COLOR.light_black)
             elif record.levelno == logging.INFO:
                 result = result.replace(COLOR_START_MARKER,
-                                        COLOR.light_white())
+                                        COLOR.light_blue)
             elif record.levelno == logging.ERROR:
                 result = result.replace(COLOR_START_MARKER,
-                                        COLOR.light_red())
+                                        COLOR.light_red)
         result = result.replace(COLOR_END_MARKER, COLOR.end())
         return result
 
@@ -47,7 +50,6 @@ FORMATTER = MyFormatter(COLOR_START_MARKER +
                         ' %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
-logging.basicConfig()
 HANDLER = logging.StreamHandler(sys.stdout)
 HANDLER.setFormatter(FORMATTER)
 logging.root.addHandler(HANDLER)
