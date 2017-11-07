@@ -58,6 +58,41 @@ class TestTaskInfo(unittest.TestCase):
         self.assertEqual(self.task.description, 'Do the second thing')
 
 
+class TestTasksInProgress(unittest.TestCase):
+    """Test TasksInProgress class"""
+    def setUp(self):
+        """Set up before test cases"""
+        identify(self)
+        self.tasks_in_progress = None
+        self.test_dir = os.path.realpath("./temp/")
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def tearDown(self):
+        """Tear down after test cases"""
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_tasks_in_progress_push(self):
+        """Test TaskInfo creation for a Build task"""
+        self.tasks_in_progress = taskinfo.TasksInProgress()
+        types = ['build', 'test', 'mentor']
+        priorities = [taskinfo.TaskPriority.MEDIUM,
+                      taskinfo.TaskPriority.LOW,
+                      taskinfo.TaskPriority.MEDIUM,
+                      taskinfo.TaskPriority.HIGH,
+                      taskinfo.TaskPriority.CRITICAL,
+                      taskinfo.TaskPriority.SHOWSTOPPER,
+                      taskinfo.TaskPriority.MEDIUM,
+                      taskinfo.TaskPriority.HIGH,
+                      taskinfo.TaskPriority.CRITICAL,
+                      taskinfo.TaskPriority.SHOWSTOPPER]
+        for i in range(0, 10):
+            task = taskinfo.TaskInfo('Task #{}'.format(i), 'build')
+            task.type = types[i % len(types)]
+            task.set_priority(priorities[i])
+            self.tasks_in_progress.push(task)
+        self.tasks_in_progress.dump()
+
+
 # class TestAdd(unittest.TestCase):
 #     """Test the 'add' command"""
 #     def setUp(self):
