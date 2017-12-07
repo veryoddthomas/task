@@ -7,6 +7,7 @@ import enum
 import queue
 import uuid
 
+import priority_queue
 
 # pylint: disable=W0511
 # FIXME: It's a bit ridiculous that we have to add the above disable just to
@@ -45,15 +46,15 @@ class TaskBacklog(object):
     """Priority queue for managing a backlog of tasks.  Tasks are moved to and
        from the TasksInProgress stack as they are activated/deactivated."""
     def __init__(self):
-        self.queue = queue.PriorityQueue()
+        self.queue = priority_queue.PriorityQueue()
 
     def put(self, task):
         """Insert a task into the backlog"""
-        self.queue.put((task.priority, task))
+        self.queue.put(task, task.priority)
 
     def get(self):
         """Remove a task from the backlog"""
-        item = self.queue.get_nowait()
+        item = self.queue.get()
         return item[1]
 
     def empty(self):
@@ -115,7 +116,7 @@ class TaskDorm(object):
             raise TypeError("'callback' must be callable")
 
         self._callback = callback
-        self._queue = queue.PriorityQueue()
+        self._queue = priority_queue.PriorityQueue()
 
     def sleep(self, item, duration):
         """Put 'item' to sleep for datetime.timedelta 'duration'"""
@@ -134,7 +135,7 @@ class TaskDorm(object):
                 "timestamp must be a datetime object (given '{}')"
                 .format(str(type(timestamp))))
 
-        self._queue.put((timestamp, item))
+        self._queue.put(item, timestamp)
 
     def wake(self, item_id):  # pylint: disable=R0201,W0613
         """Immediately wake the item with id 'item_id'"""
@@ -149,13 +150,13 @@ class TaskDorm(object):
         """Wake up all items that are ready to wake"""
         now = datetime.datetime.now()
         # TODO: this logic can be optimized if our queue has a peek() method
-        while self._queue.qsize() > 0:
-            item = self._queue.get()
-            if item[0] <= now:
-                self._callback(item[1])
+        while self._queue.size() > 0:
+            item = self._queue.get_tuple()
+            if item[1] <= now:
+                self._callback(item[0])
             else:
                 # put the item back & terminate iteration
-                self._queue.put(item)
+                self._queue.put(item[0], item[1])
                 break
 
 
