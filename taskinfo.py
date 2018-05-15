@@ -2,8 +2,10 @@
 TaskInfo class to encapsulate data and operations we want want to use
 """
 
+import abc
 import datetime
 import enum
+import json
 import queue
 import uuid
 
@@ -12,9 +14,26 @@ import priority_queue
 # pylint: disable=W0511
 # FIXME: It's a bit ridiculous that we have to add the above disable just to
 #        allow TODOs & FIXMEs
+class ISerializable(object):
+    __metaclass__ = abc.ABCMeta
+
+    @classmethod
+    def format(cls):
+        return "json"
+
+    @abc.abstractmethod
+    def serialize(self, to_file):
+        """Saves the class to 'to_file' of format self.format"""
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def load(cls, from_file):
+        """Loads the contents of 'from_file' into a valid class instance"""
+        raise NotImplementedError
 
 
-class TasksInProgress(object):
+class TasksInProgress(ISerializable):
     """LIFO stack for capturing tasks as they come in.  This structure is used
        for storing interrupt items until they can be moved to the Backlog"""
     def __init__(self):
@@ -41,8 +60,26 @@ class TasksInProgress(object):
         for task in reversed(self.stack):
             print(task)
 
+    def serialize(self, to_file):
+        """Saves the stack to 'to_file'"""
+        task_list = [task.id for task in self.stack]
+        with open(to_file, "w") as outfile:
+            outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
+                separators=(',', ': ')))
 
-class TaskBacklog(object):
+    def load(cls, from_file):
+        """Loads a stack from 'from_file'"""
+        with open(from_file) as infile:
+            task_list = json.loads(infile.read())
+
+        stack = cls()
+        for task_id in task_list:
+            stack.push(TaskInfo.from_id(task_id))
+
+        return stack
+
+
+class TaskBacklog(ISerializable):
     """Priority queue for managing a backlog of tasks.  Tasks are moved to and
        from the TasksInProgress stack as they are activated/deactivated."""
     def __init__(self):
@@ -64,6 +101,24 @@ class TaskBacklog(object):
     def peek(self):  # pylint: disable=R0201
         """Look at the next task on the queue without removing it"""
         assert False, "Not implemented due to PriorityQueue limitations"
+
+    def serialize(self, to_file):
+        """Saves the queue to 'to_file'"""
+        task_list = [task.id for task in self.queue]
+        with open(to_file, "w") as outfile:
+            outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
+                separators=(',', ': ')))
+
+    def load(cls, from_file):
+        """Loads a queue from 'from_file'"""
+        with open(from_file) as infile:
+            task_list = json.loads(infile.read())
+
+        queue = cls()
+        for task_id in task_list:
+            queue.put(TaskInfo.from_id(task_id))
+
+        return queue
 
 
 class TaskLimbo(object):
@@ -269,6 +324,11 @@ description: {}
 type: {}
 priority: {}""".format(self.id, self.description, self.type, self.priority)
         return retval
+
+    @classmethod
+    def from_id(cls, task_id):
+        """Returns a task object for the given task id"""
+        raise NotImplementedError  # TODO
 
 
 class RefCount(object):
