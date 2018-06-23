@@ -71,6 +71,10 @@ def main(params):
     parser = create_command_line_parser(command_modules)
     parsed_args = parser.parse_args(params)
 
+    if not hasattr(parsed_args, "func"):
+        parser.print_help()
+        return 1
+
     # updater = update.Updater()
     # updater.update()
     # initialize_settings("$HOME/.task/settings")
