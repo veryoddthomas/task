@@ -11,6 +11,7 @@ import uuid
 
 import priority_queue
 
+
 # pylint: disable=W0511
 # FIXME: It's a bit ridiculous that we have to add the above disable just to
 #        allow TODOs & FIXMEs
@@ -65,7 +66,7 @@ class TasksInProgress(ISerializable):
         task_list = [task.id for task in self.stack]
         with open(to_file, "w") as outfile:
             outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
-                separators=(',', ': ')))
+                                     separators=(',', ': ')))
 
     def load(cls, from_file):
         """Loads a stack from 'from_file'"""
@@ -107,7 +108,7 @@ class TaskBacklog(ISerializable):
         task_list = [task.id for task in self.queue]
         with open(to_file, "w") as outfile:
             outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
-                separators=(',', ': ')))
+                                     separators=(',', ': ')))
 
     def load(cls, from_file):
         """Loads a queue from 'from_file'"""

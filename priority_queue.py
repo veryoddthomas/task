@@ -97,7 +97,7 @@ class PriorityQueue(object):
                 del self._queues[level]
                 self._levels.pop(0)
 
-            return (ret, level)
+            return ret, level
         finally:
             self._lock.release()
 
