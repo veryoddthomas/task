@@ -6,6 +6,7 @@
 # logger.setLevel(logging.INFO)
 
 import argparse
+import logging
 import os
 try:
     import argcomplete
@@ -74,6 +75,12 @@ def main(params):
     if not hasattr(parsed_args, "func"):
         parser.print_help()
         return 1
+
+    if parsed_args.verbosity > 0:
+        log.setLevel(logging.INFO)
+
+    if parsed_args.verbosity > 1:
+        log.setLevel(logging.DEBUG)
 
     # updater = update.Updater()
     # updater.update()
