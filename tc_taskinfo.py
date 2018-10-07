@@ -14,7 +14,6 @@ import taskinfo
 def identify(testobj):
     """Identify running test in log"""
     print("\n{}\n{}\n{}".format("="*72, testobj.id().split('.')[-1], "="*72))
-    return
 
 # @patch('os.path.exists')
 # @patch('os.makedirs')

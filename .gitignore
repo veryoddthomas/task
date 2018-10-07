@@ -4,3 +4,4 @@ log.txt
 __pycache__/
 *.pyc
 README.html
+.tasks

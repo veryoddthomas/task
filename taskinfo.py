@@ -2,28 +2,44 @@
 TaskInfo class to encapsulate data and operations we want want to use
 """
 
+# system imports
 import abc
 import datetime
-import enum
+# import enum  # FIXME
 import json
+import os
+import platform
 import queue
+import tempfile
 import uuid
 
+# local imports
+import gitrepo
 import priority_queue
 
 
-# pylint: disable=W0511
-# FIXME: It's a bit ridiculous that we have to add the above disable just to
-#        allow TODOs & FIXMEs
+class TaskSyntaxError(ValueError):
+    """Represents a user syntax error when authoring a task spec"""
+    pass
+
+
 class ISerializable(object):
+    """Base class representing a (JSON) serializable object"""
     __metaclass__ = abc.ABCMeta
 
     @classmethod
     def format(cls):
+        """Returns the serialization format"""
         return "json"
 
+    @staticmethod
+    def pretty(data, sort=True, indent=4):
+        """Dumps arbitrary data as pretty-printed JSON"""
+        return json.dumps(data, sort_keys=sort, indent=indent,
+                          separators=(',', ': '))
+
     @abc.abstractmethod
-    def serialize(self, to_file):
+    def serialize(self, to_file=None):
         """Saves the class to 'to_file' of format self.format"""
         raise NotImplementedError
 
@@ -61,13 +77,15 @@ class TasksInProgress(ISerializable):
         for task in reversed(self.stack):
             print(task)
 
-    def serialize(self, to_file):
+    def serialize(self, to_file=None):
         """Saves the stack to 'to_file'"""
+        assert to_file is not None  # FIXME
         task_list = [task.id for task in self.stack]
         with open(to_file, "w") as outfile:
             outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
                                      separators=(',', ': ')))
 
+    @classmethod
     def load(cls, from_file):
         """Loads a stack from 'from_file'"""
         with open(from_file) as infile:
@@ -103,23 +121,24 @@ class TaskBacklog(ISerializable):
         """Look at the next task on the queue without removing it"""
         assert False, "Not implemented due to PriorityQueue limitations"
 
-    def serialize(self, to_file):
+    def serialize(self, to_file=None):
         """Saves the queue to 'to_file'"""
+        assert to_file is not None  # FIXME
         task_list = [task.id for task in self.queue]
         with open(to_file, "w") as outfile:
-            outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
-                                     separators=(',', ': ')))
+            outfile.write(self.pretty(task_list))
 
+    @classmethod
     def load(cls, from_file):
         """Loads a queue from 'from_file'"""
         with open(from_file) as infile:
             task_list = json.loads(infile.read())
 
-        queue = cls()
+        queue_obj = cls()
         for task_id in task_list:
-            queue.put(TaskInfo.from_id(task_id))
+            queue_obj.put(TaskInfo.from_id(task_id))
 
-        return queue
+        return queue_obj
 
 
 class TaskLimbo(object):
@@ -283,7 +302,9 @@ class TaskMaster(object):
         self.graveyard.append(active_item)
 
 
-class TaskPriority(enum.Enum):
+# FIXME - figure out proper conversions/serialization for python3 Enum
+# class TaskPriority(enum.Enum):
+class TaskPriority:  # pylint: disable=too-few-public-methods
     """Task Priorities"""
     SHOWSTOPPER = 0  # [tbd] Stuck to front of queue, top of stack?
     CRITICAL = 1
@@ -292,44 +313,275 @@ class TaskPriority(enum.Enum):
     LOW = 4
 
 
-class TaskInfo(object):
+class TaskInfo(ISerializable):
     """Stores all information about a task"""
-    def __init__(self, description, task_type, priority=None):
-        if priority is None:
-            priority = TaskPriority.MEDIUM
+    _READ_ONLY_FIELDS = [
+        "id",
+    ]
 
-        self.id = uuid.uuid4()
+    def __init__(self, description, task_type, **kwargs):
+        self.id = uuid.uuid4().hex
         self.description = description
         self.type = task_type
         self.priority = None
+        self._unknown_args = None
+
+        self._load_dict(kwargs)
+
+    def _load_dict(self, kwargs):
+        """Loads keyword arguments from 'kwargs' dictionary"""
+        # TaskInfo always needs a description and task_type, but all other
+        # supported (optional) parameters are loaded from kwargs to
+        keyword_args = dict(kwargs)
+        task_id = TaskInfo._dpop(keyword_args, "id")
+        if task_id is not None:
+            self.id = task_id
+
+        priority = TaskInfo._dpop(keyword_args, "priority")
+        if priority is None:
+            priority = TaskPriority.MEDIUM
+        else:
+            priority = int(priority)
+
+        description = TaskInfo._dpop(keyword_args, "description")
+        if description is not None:
+            self.description = description
+
+        task_type = TaskInfo._dpop(keyword_args, "type")
+        if task_type is not None:
+            self.type = task_type
+
+        # store unknown args so that they are not lost across
+        # serialization/deserialization
+        self._unknown_args = keyword_args
 
         self.set_priority(priority)
 
+    @staticmethod
+    def _dpop(dictionary, key, default=None):
+        """Removes & returns the value of 'key' from dictionary"""
+        try:
+            ret = dictionary[key]
+            del dictionary[key]
+        except KeyError:
+            ret = default
+
+        return ret
+
     def set_priority(self, priority):
         """Set task priority"""
-        if not isinstance(priority, TaskPriority):
+        # FIXME - workaround for Enum issues
+        # if not isinstance(priority, TaskPriority):
+        if not isinstance(priority, int):
             raise TypeError("Invalid priority '{}' of type '{}'".format(
                 str(priority), str(type(priority))))
 
         self.priority = priority
-        return
 
     def do_nothing(self):
         """TBD"""
         return self
 
     def __str__(self):
-        retval = """
-id: {}
-description: {}
-type: {}
-priority: {}""".format(self.id, self.description, self.type, self.priority)
+        _str_keys = [
+            "id",
+            "description",
+            "type",
+            "priority",
+        ]
+
+        temp_dict = self.dict()
+        filtered_dict = {key: temp_dict[key] for key in _str_keys}
+        return self.pretty(filtered_dict)
+
+    def dict(self):
+        """Converts TaskInfo object to a dictionary"""
+        retval = {
+            "id": self.id,
+            "description": self.description,
+            "type": self.type,
+            "priority": self.priority,
+        }
+
+        retval.update(self._unknown_args)
+
         return retval
+
+    def edit(self):
+        """Opens up an editor and allows the user to update the task directly.
+        """
+        template = TaskInfo._generate_template(self.dict())
+        tempf = tempfile.mkstemp()[1]
+        try:
+            with open(tempf, 'w') as outfile:
+                outfile.write(template)
+
+            editor_cmd = [
+                TaskInfo._select_editor(),
+                tempf,
+            ]
+            os.system(" ".join(editor_cmd))
+
+            # validate edited file
+            while True:
+                try:
+                    self._file_update(tempf)
+                    break
+                except TaskSyntaxError as e:
+                    input(
+                        # pylint: disable=line-too-long
+                        "Task syntax error (enter returns to editor): {}".format(  # nopep8
+                            str(e)))
+                    os.system(" ".join(editor_cmd))
+                    continue
+        finally:
+            if os.path.exists(tempf):
+                os.remove(tempf)
+
+        # commit changes
+        self.serialize()
+
+    @staticmethod
+    def _generate_template(dictionary):
+        """Generates a template for user file-editing"""
+        task_dict = dict(dictionary)
+        lines = []
+        for key in sorted(TaskInfo._READ_ONLY_FIELDS):
+            if key not in task_dict:
+                continue
+
+            value = TaskInfo._dpop(task_dict, key)
+            lines.extend([
+                "# {}:".format(key),
+                "# {}".format("\n#".join(value.splitlines())),
+                "",
+            ])
+
+        for key in sorted(task_dict.keys()):
+            lines.extend([
+                "{}:".format(key),
+                str(task_dict[key]),
+                "",
+            ])
+
+        return "\n".join(lines)
+
+    def _file_update(self, filename):
+        """Updates task object data based on the user values in 'filename'"""
+        values = TaskInfo._parse_file(filename)
+        self._load_dict(values)
+
+    @staticmethod
+    def _parse_file(filename):
+        """Parses & returns a map of task field values from a user-authored
+           file"""
+        with open(filename) as infile:
+            data = infile.read()
+
+        values = {}
+        blank_line = True  # beginning of file always counts as a blank line
+        field_name = None
+        cur_field = []
+        for line in data.splitlines():
+            if line.startswith("#"):
+                continue  # skip comments
+
+            if not line:
+                blank_line = True
+                cur_field.append(line)
+                continue
+
+            if blank_line and line.endswith(":") and len(line.split()) == 1:
+                # this is a new field name
+                while cur_field and not cur_field[-1]:
+                    # remove trailing blank lines
+                    cur_field.pop()
+
+                if cur_field and not field_name:
+                    # there is data for a field present, but no field name
+                    raise TaskSyntaxError(
+                        "Missing field name for data:\n{}".format(
+                            "\n".join(cur_field)))
+
+                if field_name:
+                    values[field_name] = "\n".join(cur_field)
+                    cur_field = []
+
+                field_name = line[:-1]
+                if field_name in TaskInfo._READ_ONLY_FIELDS:
+                    raise TaskSyntaxError(
+                        "'{}' field is read-only".format(field_name))
+
+                blank_line = False
+                continue
+
+            blank_line = False
+            cur_field.append(line)
+
+        # FIXME - redundant code
+        while cur_field and not cur_field[-1]:
+            # remove trailing blank lines
+            cur_field.pop()
+
+        if cur_field and not field_name:
+            # there is data for a field present, but no field name
+            raise TaskSyntaxError(
+                "\nMissing field name for data:\n{{\n{}\n}}".format(
+                    "\n".join(cur_field)))
+
+        if field_name:
+            values[field_name] = "\n".join(cur_field)
+
+        return values
+
+    @staticmethod
+    def _select_editor():
+        """Selects an editor based on the following rules:
+           1) TASKEDITOR env var, if defined
+           2) EDITOR env var, if defined
+           3) vi (unix)
+           4) notepad (windows)"""
+        editor = os.environ.get("TASKEDITOR")
+        if editor is not None:
+            return editor
+
+        editor = os.environ.get("EDITOR")
+        if editor is not None:
+            return editor
+
+        is_windows = platform.system().lower().startswith("windows")
+        return "notepad" if is_windows else "vi"
+
+    def serialize(self, to_file=None):
+        """Saves the task to file'"""
+        if to_file is not None:
+            raise ValueError(
+                "TaskInfo does not support serialization to a custom filename")
+
+        to_file = self.filename
+        gitrepo.write_task(to_file, self.pretty(self.dict()))
+
+    @staticmethod
+    def _filename(task_id):
+        """Constructs task filename from 'task_id'"""
+        return "{}.json".format(task_id)
+
+    @property
+    def filename(self):
+        """Property accessor for task filename"""
+        return TaskInfo._filename(self.id)
+
+    @classmethod
+    def load(cls, from_file):
+        """Loads a task from 'from_file'"""
+        json_str = gitrepo.read_task(from_file)
+        task_dict = json.loads(json_str)
+        return cls(**task_dict)
 
     @classmethod
     def from_id(cls, task_id):
         """Returns a task object for the given task id"""
-        raise NotImplementedError  # TODO
+        return cls.load(TaskInfo._filename(task_id))
 
 
 class RefCount(object):
