@@ -125,7 +125,7 @@ class TaskBacklog(ISerializable):
     def get(self):
         """Remove a task from the backlog"""
         item = self.queue.get()
-        return item[1]
+        return item
 
     def empty(self):
         """Returns True if the queue is empty; False otherwise"""
@@ -321,6 +321,10 @@ class TaskMaster(object):
 
     def _save(self):
         """Save structures to file"""
+        if not os.path.exists(gitrepo.DEFAULT_REPOSITORY_PATH):
+            # there is no data yet --> nothing to save
+            return
+
         self.stack.serialize(DEFAULT_STACK)
         self.backlog.serialize(DEFAULT_QUEUE)
         # self.blocked.serialize(DEFAULT_LIMBO)

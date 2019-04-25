@@ -18,6 +18,10 @@ class IterQueue(object):
 
         self._items = list(items)
 
+    def __len__(self):
+        """len() operator override"""
+        return len(self._items)
+
     def __iter__(self):
         """Iterator for queue object"""
         for item in self._items:
@@ -122,7 +126,7 @@ class PriorityQueue(object):
         self._lock.acquire()
         try:
             # sum([]) returns 0 in Python; the below expression is always safe
-            return sum([len(queue) for queue in self._queues])
+            return sum([len(queue) for queue in self._queues.values()])
         finally:
             self._lock.release()
 
