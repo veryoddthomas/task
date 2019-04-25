@@ -24,7 +24,11 @@ def process_command(args):
         print("No tasks found!")
         return
 
-    print(cur_task)
+    data = cur_task.dict()
+    description = data["description"]
+    del data["description"]
+    print(cur_task.pretty(data))
+    print(description)
 
 
 def create_parser(subparsers):
