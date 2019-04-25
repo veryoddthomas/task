@@ -13,16 +13,16 @@ from custom_logger import get_logger
 def process_command(args):
     """Process sub-command 'add'"""
 
-    taskmaster = taskinfo.TaskMaster()
-    if args.edit:
-        task = taskinfo.TaskInfo("<description>", "quick")
-        task.edit()
-    else:
-        task = taskinfo.TaskInfo(args.summary, args.type)
-    taskmaster.add(task)
-    log = get_logger('task')
-    log.info("task id = %s" % task.id)
-    log.info("task type = %s" % task.type)
+    with taskinfo.TaskMaster() as taskmaster:
+        if args.edit:
+            task = taskinfo.TaskInfo("<description>", "quick")
+            task.edit()
+        else:
+            task = taskinfo.TaskInfo(args.summary, args.type)
+        taskmaster.add(task)
+        log = get_logger('task')
+        log.info("task id = %s" % task.id)
+        log.info("task type = %s" % task.type)
 
 
 def create_parser(subparsers):

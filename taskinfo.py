@@ -17,6 +17,12 @@ import uuid
 import gitrepo
 import priority_queue
 
+# FIXME - hardcoded structure files (no versioncontrol)
+DEFAULT_STACK = os.path.join(gitrepo.DEFAULT_REPOSITORY_PATH, "stack.json")
+DEFAULT_QUEUE = os.path.join(gitrepo.DEFAULT_REPOSITORY_PATH, "queue.json")
+DEFAULT_LIMBO = os.path.join(gitrepo.DEFAULT_REPOSITORY_PATH, "limbo.json")
+DEFAULT_DORM = os.path.join(gitrepo.DEFAULT_REPOSITORY_PATH, "dorm.json")
+
 
 class TaskSyntaxError(ValueError):
     """Represents a user syntax error when authoring a task spec"""
@@ -77,6 +83,14 @@ class TasksInProgress(ISerializable):
         for task in reversed(self.stack):
             print(task)
 
+    def find(self, task_id):
+        """Searches for a task by 'task_id'. Uses prefix-matching."""
+        for task_obj in self.stack:
+            if task_obj.id.startswith(task_id):
+                return task_obj
+
+        raise LookupError("No such task in stack: '{}'".format(task_id))
+
     def serialize(self, to_file=None):
         """Saves the stack to 'to_file'"""
         assert to_file is not None  # FIXME
@@ -120,6 +134,14 @@ class TaskBacklog(ISerializable):
     def peek(self):  # pylint: disable=R0201
         """Look at the next task on the queue without removing it"""
         assert False, "Not implemented due to PriorityQueue limitations"
+
+    def find(self, task_id):
+        """Searches for a task by 'task_id'. Uses prefix-matching."""
+        for task_obj in self.queue:
+            if task_obj.id.startswith(task_id):
+                return task_obj
+
+        raise LookupError("No such task in queue: '{}'".format(task_id))
 
     def serialize(self, to_file=None):
         """Saves the queue to 'to_file'"""
@@ -181,6 +203,14 @@ class TaskLimbo(object):
 
         del self._blockers[completed_item]
 
+    def find(self, task_id):
+        """Searches for a task by 'task_id'. Uses prefix-matching."""
+        for task_obj in self._blocked_items:
+            if task_obj.id.startswith(task_id):
+                return task_obj
+
+        raise LookupError("No such task in limbo: '{}'".format(task_id))
+
 
 class TaskDorm(object):
     """Stores sleeping Tasks in the order that they will wake up. Items
@@ -234,6 +264,14 @@ class TaskDorm(object):
                 self._queue.put(item[0], item[1])
                 break
 
+    def find(self, task_id):
+        """Searches for a task by 'task_id'. Uses prefix-matching."""
+        for task_obj in self._queue:
+            if task_obj.id.startswith(task_id):
+                return task_obj
+
+        raise LookupError("No such task in dorm: '{}'".format(task_id))
+
 
 class TaskMaster(object):
     """Contains all scopes/structures used by the task tool & controls
@@ -245,11 +283,71 @@ class TaskMaster(object):
        * Graveyard (closed issues in a simple list)
     """
     def __init__(self):
-        self.stack = TasksInProgress()
-        self.backlog = TaskBacklog()
+        """TaskMaster constructor"""
+        self.backlog = None
+        self.blocked = None
+        self.graveyard = []  # TODO - just load from file; not memory
+        self.sleeping = None
+        self.stack = None
+        self._load()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self._save()
+
+    def _load(self):
+        """Load structure from file"""
+        if os.path.exists(DEFAULT_STACK):
+            self.stack = TasksInProgress.load(DEFAULT_STACK)
+        else:
+            self.stack = TasksInProgress()
+
+        if os.path.exists(DEFAULT_QUEUE):
+            self.backlog = TaskBacklog.load(DEFAULT_QUEUE)
+        else:
+            self.backlog = TaskBacklog()
+
         self.blocked = TaskLimbo(callback=self.stack.push)
+        # FIXME: implement serialization for TaskLimbo
+        # if os.path.exists(DEFAULT_LIMBO):
+        #     self.blocked.load(DEFAULT_LIMBO)
+
         self.sleeping = TaskDorm(callback=self.stack.push)
-        self.graveyard = []
+        # FIXME: implement serialization for TaskDorm
+        # if os.path.exists(DEFAULT_DORM):
+        #     self.sleeping.load(DEFAULT_DORM)
+
+    def _save(self):
+        """Save structures to file"""
+        self.stack.serialize(DEFAULT_STACK)
+        self.backlog.serialize(DEFAULT_QUEUE)
+        # self.blocked.serialize(DEFAULT_LIMBO)
+        # self.sleeping.serialize(DEFAULT_DORM)
+
+    def find(self, task_id):
+        """Searches for a task by 'task_id'. Uses prefix-matching."""
+        _structs = [
+            self.stack,
+            self.backlog,
+            self.blocked,
+            self.sleeping,
+        ]
+        for struct in _structs:
+            try:
+                task_obj = struct.find(task_id)
+                return task_obj
+            except LookupError:
+                # not found; try next structure
+                continue
+
+        # the graveyard is just a list; search it
+        for task_obj in self.graveyard:
+            if task_obj.id.startswith(task_id):
+                return task_obj
+
+        raise LookupError("No such task: '{}'".format(task_id))
 
     def active_item(self, remove=True):
         """Returns the active item"""
@@ -300,6 +398,14 @@ class TaskMaster(object):
         """Closes out the active item"""
         active_item = self.stack.pop()
         self.graveyard.append(active_item)
+
+    @property
+    def current_task(self):
+        """Returns the current task without removing it from the stack"""
+        try:
+            return self.active_item(remove=False)
+        except queue.Empty:
+            return None
 
 
 # FIXME - figure out proper conversions/serialization for python3 Enum
@@ -386,7 +492,7 @@ class TaskInfo(ISerializable):
         _str_keys = [
             "id",
             "description",
-            "type",
+            "task_type",
             "priority",
         ]
 
@@ -399,7 +505,7 @@ class TaskInfo(ISerializable):
         retval = {
             "id": self.id,
             "description": self.description,
-            "type": self.type,
+            "task_type": self.type,
             "priority": self.priority,
         }
 
