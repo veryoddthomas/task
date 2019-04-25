@@ -212,16 +212,14 @@ class TaskLimbo(object):
         raise LookupError("No such task in limbo: '{}'".format(task_id))
 
 
-class TaskDorm(object):
+class TaskDorm(ISerializable):
     """Stores sleeping Tasks in the order that they will wake up. Items
        can be woken/fetched by id, but it may be inefficient"""
     def __init__(self, callback):
         """Constructor for TaskDorm class"""
-        if not callable(callback):
-            raise TypeError("'callback' must be callable")
-
-        self._callback = callback
+        self._callback = None
         self._queue = priority_queue.PriorityQueue()
+        self.set_callback(callback)
 
     def sleep(self, item, duration):
         """Put 'item' to sleep for datetime.timedelta 'duration'"""
@@ -272,6 +270,44 @@ class TaskDorm(object):
 
         raise LookupError("No such task in dorm: '{}'".format(task_id))
 
+    def set_callback(self, callback):
+        """Sets the internal callback"""
+        if not callable(callback):
+            raise TypeError("'callback' must be callable")
+
+        self._callback = callback
+
+    def serialize(self, to_file=None):
+        """Saves the dorm to 'to_file'"""
+        assert to_file is not None  # FIXME
+        wake_list = []
+        for task_obj, timestamp in self._queue.items():
+            utc_timestamp = \
+                timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
+            wake_list.append((task_obj.id, utc_timestamp))
+
+        with open(to_file, "w") as outfile:
+            outfile.write(self.pretty(wake_list))
+
+    @classmethod
+    def load(cls, from_file):
+        """Loads a dorm from 'from_file'"""
+        with open(from_file) as infile:
+            wake_list = json.loads(infile.read())
+
+        dorm_obj = cls(_dummy_callback)
+        for task_id, timestamp in wake_list:
+            datetime_obj = datetime.datetime.utcfromtimestamp(timestamp)
+            dorm_obj.wake_at(TaskInfo.from_id(task_id), datetime_obj)
+
+        return dorm_obj
+
+
+def _dummy_callback():
+        """Dummy callback to satisfy constructor requirement until
+           set_callback() can be called by the TaskMaster"""
+        assert False, "TRESPASS - set_callback() must be called"
+
 
 class TaskMaster(object):
     """Contains all scopes/structures used by the task tool & controls
@@ -314,10 +350,11 @@ class TaskMaster(object):
         # if os.path.exists(DEFAULT_LIMBO):
         #     self.blocked.load(DEFAULT_LIMBO)
 
-        self.sleeping = TaskDorm(callback=self.stack.push)
-        # FIXME: implement serialization for TaskDorm
-        # if os.path.exists(DEFAULT_DORM):
-        #     self.sleeping.load(DEFAULT_DORM)
+        if os.path.exists(DEFAULT_DORM):
+            self.sleeping = TaskDorm.load(DEFAULT_DORM)
+            self.sleeping.set_callback(self.stack.push)
+        else:
+            self.sleeping = TaskDorm(callback=self.stack.push)
 
     def _save(self):
         """Save structures to file"""
@@ -328,7 +365,7 @@ class TaskMaster(object):
         self.stack.serialize(DEFAULT_STACK)
         self.backlog.serialize(DEFAULT_QUEUE)
         # self.blocked.serialize(DEFAULT_LIMBO)
-        # self.sleeping.serialize(DEFAULT_DORM)
+        self.sleeping.serialize(DEFAULT_DORM)
 
     def find(self, task_id):
         """Searches for a task by 'task_id'. Uses prefix-matching."""

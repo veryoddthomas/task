@@ -19,6 +19,8 @@ def process_command(args):
             task.edit()
         else:
             task = taskinfo.TaskInfo(args.summary, args.type)
+            task.serialize()  # commit changes
+
         taskmaster.add(task)
         log = get_logger('task')
         log.info("task id = %s" % task.id)

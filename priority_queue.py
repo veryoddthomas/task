@@ -133,3 +133,12 @@ class PriorityQueue(object):
     def empty(self):
         """Returns True if there are 0 items in the queue; False otherwise"""
         return self.size() == 0
+
+    def items(self):
+        """Returns a list of (item, priority) tuples"""
+        ret = []
+        for level in self._levels:
+            for item in self._queues[level]:
+                ret.append((item, level))
+
+        return ret
