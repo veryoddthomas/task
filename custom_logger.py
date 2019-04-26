@@ -62,7 +62,7 @@ FORMATTER = MyFormatter(COLOR_START_MARKER +
 HANDLER = logging.StreamHandler(sys.stdout)
 HANDLER.setFormatter(FORMATTER)
 logging.root.addHandler(HANDLER)
-logging.root.setLevel(logging.DEBUG)
+logging.root.setLevel(logging.WARNING)
 
 
 def get_logger(logger_name):

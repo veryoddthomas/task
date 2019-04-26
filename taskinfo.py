@@ -26,7 +26,6 @@ DEFAULT_DORM = os.path.join(gitrepo.DEFAULT_REPOSITORY_PATH, "dorm.json")
 
 class TaskSyntaxError(ValueError):
     """Represents a user syntax error when authoring a task spec"""
-    pass
 
 
 class ISerializable(object):
@@ -304,9 +303,9 @@ class TaskDorm(ISerializable):
 
 
 def _dummy_callback():
-        """Dummy callback to satisfy constructor requirement until
-           set_callback() can be called by the TaskMaster"""
-        assert False, "TRESPASS - set_callback() must be called"
+    """Dummy callback to satisfy constructor requirement until
+       set_callback() can be called by the TaskMaster"""
+    assert False, "TRESPASS - set_callback() must be called"
 
 
 class TaskMaster(object):

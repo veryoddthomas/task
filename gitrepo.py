@@ -16,7 +16,6 @@ REPOSITORY = None
 
 class InvalidRepository(RuntimeError):
     """Exception raised when a bad/invalid Git repository is detected"""
-    pass
 
 
 class GitRepository(object):

@@ -10,9 +10,20 @@ import taskinfo
 # from custom_logger import get_logger
 
 
+def print_task_summary(task_data):
+    """Print one line summary of task information"""
+    from ansi_color import TermColor
+    tc = TermColor()
+    print("{red}{id}{endc} {desc}".format(
+        id=task_data["id"][:7],
+        desc=task_data["description"],
+        red=tc.light_red,
+        endc=tc.end()
+        ))
+
+
 def process_command(args):
     """Process sub-command 'show'"""
-    # log = get_logger('task')
     cur_task = None
     with taskinfo.TaskMaster() as taskmaster:
         if args.id is None:
@@ -25,10 +36,7 @@ def process_command(args):
         return
 
     data = cur_task.dict()
-    description = data["description"]
-    del data["description"]
-    print(cur_task.pretty(data))
-    print(description)
+    print_task_summary(data)
 
 
 def create_parser(subparsers):

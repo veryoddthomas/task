@@ -76,11 +76,15 @@ def main(params):
         parser.print_help()
         return 1
 
-    if parsed_args.verbosity > 0:
-        log.setLevel(logging.INFO)
-
-    if parsed_args.verbosity > 1:
+    if parsed_args.verbosity >= 2:
         log.setLevel(logging.DEBUG)
+    elif parsed_args.verbosity == 1:
+        log.setLevel(logging.INFO)
+    else:
+        log.setLevel(logging.WARNING)
+
+    # print("VERBOSITY: {}".format(parsed_args.verbosity))
+    # print("LEVEL: {}".format(log.getEffectiveLevel()))
 
     # updater = update.Updater()
     # updater.update()
