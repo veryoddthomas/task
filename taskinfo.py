@@ -61,6 +61,11 @@ class TasksInProgress(ISerializable):
     def __init__(self):
         self.stack = list()
 
+    def __iter__(self):
+        """Object iterator"""
+        for item in self.stack:
+                yield item
+
     def push(self, task):
         """Push a task onto the stack"""
         self.stack.append(task)
@@ -98,6 +103,9 @@ class TasksInProgress(ISerializable):
             outfile.write(json.dumps(task_list, sort_keys=True, indent=4,
                                      separators=(',', ': ')))
 
+    def __len__(self):
+        return len(self.stack)
+
     @classmethod
     def load(cls, from_file):
         """Loads a stack from 'from_file'"""
@@ -116,6 +124,11 @@ class TaskBacklog(ISerializable):
        from the TasksInProgress stack as they are activated/deactivated."""
     def __init__(self):
         self.queue = priority_queue.PriorityQueue()
+
+    def __iter__(self):
+        """Object iterator"""
+        for item in self.queue:
+                yield item
 
     def put(self, task):
         """Insert a task into the backlog"""
@@ -175,6 +188,11 @@ class TaskLimbo(object):
         self._blocked_items = {}
         self._blockers = {}
 
+    def __iter__(self):
+        """Object iterator"""
+        for item in self._blocked_items:
+                yield item
+
     def block(self, item, blocked_by):
         """Stores 'item' internally, indexed by 'blocked_by'"""
         item_meta = self._blocked_items.get(item)
@@ -219,6 +237,11 @@ class TaskDorm(ISerializable):
         self._callback = None
         self._queue = priority_queue.PriorityQueue()
         self.set_callback(callback)
+
+    def __iter__(self):
+        """Object iterator"""
+        for item in self._queue:
+                yield item
 
     def sleep(self, item, duration):
         """Put 'item' to sleep for datetime.timedelta 'duration'"""
