@@ -11,14 +11,16 @@ from ansi_color import TermColor
 # from custom_logger import get_logger
 
 
-def print_task_summary(task_data):
+def print_task_summary(task_data, color=None):
     """Print one line summary of task information"""
     tc = TermColor()
+    if color is None:
+        color = tc.light_green
     print("  {c1}{id}{endc} {c2}{pri}{endc} {desc}".format(
         id=task_data["id"][:7],
         pri=task_data["priority"],
         desc=task_data["description"],
-        c1=tc.light_green,
+        c1=color,
         c2=tc.light_black,
         endc=tc.end()
         ))
@@ -27,19 +29,19 @@ def print_task_summary(task_data):
 def print_tasks(tm):
     tc = TermColor()
     _task_groups = [
-        ("Active Tasks", tm.stack),
-        ("Blocked Tasks", tm.blocked),
-        ("Sleeping Tasks", tm.sleeping),
-        ("Backlog Tasks", tm.backlog),
+        ("Active Tasks", tm.stack, tc.light_green),
+        ("Blocked Tasks", tm.blocked, tc.light_red),
+        ("Sleeping Tasks", tm.sleeping, tc.light_black),
+        ("Backlog Tasks", tm.backlog, tc.light_blue),
     ]
     # for struct in _structs
-    for group_name, group in _task_groups:
+    for group_name, group, color in _task_groups:
         print("{}{}{}".format(tc.light_white, group_name, tc.end()))
         # print("=" * len(group_name))
         found = False
         for task in group: # .find_all():
             data = task.dict()
-            print_task_summary(data)
+            print_task_summary(data, color)
             found = True
         if not found:
             print("  None")
