@@ -81,7 +81,10 @@ class GitRepository(object):
         """Commits any pending changes"""
         escaped_message = shlex.quote(message)
         command = "commit -m {}".format(escaped_message)
-        self._git_command(command)
+        try:
+            self._git_command(command)
+        except subprocess.CalledProcessError as e:
+            print("No change detected.  Ignoring update.")
 
     @property
     def location(self):

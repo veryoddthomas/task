@@ -16,7 +16,7 @@ def print_task_summary(task_data, color=None):
     tc = TermColor()
     if color is None:
         color = tc.light_green
-    print("  {c1}{id}{endc} {c2}{pri}{endc} {desc}".format(
+    print("  {c1}{id}{endc}  {c2}{pri}{endc}  {desc}".format(
         id=task_data["id"][:7],
         pri=task_data["priority"],
         desc=task_data["description"],
