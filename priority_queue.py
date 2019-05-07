@@ -27,9 +27,9 @@ class IterQueue(object):
         for item in self._items:
             yield item
 
-    def get(self):
+    def get(self, idx=0):
         """Remove an item from the queue"""
-        return self._items.pop(0)
+        return self._items.pop(idx)
 
     def peek(self):
         """Look at the top item in the queue"""
@@ -104,6 +104,54 @@ class PriorityQueue(object):
             return ret, level
         finally:
             self._lock.release()
+
+    def remove(self, item):
+        """Removes & returns a tuple of (value, priority)"""
+        self._lock.acquire()
+        try:
+            if not self._levels:
+                raise Empty
+
+            for level in self._levels:
+                queue = self._queues[level]
+                to_remove = None
+                for idx, queued_item in enumerate(queue):
+                    if queued_item == item:
+                        to_remove = idx
+                        break
+                if to_remove:
+                    ret = queue.get(to_remove)
+                    if queue.empty():
+                        del self._queues[level]
+                        self._levels.pop(0)
+                    return ret
+            raise KeyError
+        finally:
+            self._lock.release()
+
+    # def remove_by_id(self, id):
+    #     """Removes & returns a tuple of (value, priority)"""
+    #     self._lock.acquire()
+    #     try:
+    #         if not self._levels:
+    #             raise Empty
+    #
+    #         for level in self._levels:
+    #             queue = self._queues[level]
+    #             to_remove = None
+    #             for idx, item in enumerate(queue):
+    #                 if item.id.startswith(id):
+    #                     to_remove = idx
+    #                     break
+    #             if to_remove:
+    #                 ret = queue.get(to_remove)
+    #                 if queue.empty():
+    #                     del self._queues[level]
+    #                     self._levels.pop(0)
+    #                 return ret
+    #         raise KeyError
+    #     finally:
+    #         self._lock.release()
 
     def peek(self):
         """Returns the highest priority item without removing it"""

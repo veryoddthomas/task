@@ -155,6 +155,12 @@ class TaskBacklog(ISerializable):
 
         raise LookupError("No such task in queue: '{}'".format(task_id))
 
+    def remove(self, task_id):
+        """Searches for a task by 'task_id', removes it, and returns it. Uses prefix-matching."""
+        task_obj = self.find(task_id)
+        self.queue.remove(task_obj)
+        return task_obj
+
     def serialize(self, to_file=None):
         """Saves the queue to 'to_file'"""
         assert to_file is not None  # FIXME
@@ -446,6 +452,12 @@ class TaskMaster(object):
         """Move the active item on the stack to the backlog"""
         active_item = self.stack.pop()
         self.backlog.put(active_item)
+
+    def activate(self, id):
+        """Move an item from the backlog to the top of the stack"""
+        active_item = self.backlog.remove(id)
+        self.stack.push(active_item)
+
 
     def sleep(self, duration):
         """Puts the active item to sleep for timedelta 'duration'"""
