@@ -119,7 +119,7 @@ class PriorityQueue(object):
                     if queued_item == item:
                         to_remove = idx
                         break
-                if to_remove:
+                if to_remove is not None:
                     ret = queue.get(to_remove)
                     if queue.empty():
                         del self._queues[level]

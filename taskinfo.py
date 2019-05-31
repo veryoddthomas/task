@@ -134,9 +134,13 @@ class TaskBacklog(ISerializable):
         """Insert a task into the backlog"""
         self.queue.put(task, task.priority)
 
-    def get(self):
+    def get(self, task_id=None):
         """Remove a task from the backlog"""
-        item = self.queue.get()
+        if task_id:
+            item = self.find(task_id)
+            self.queue.remove(item)
+        else:
+            item = self.queue.get()
         return item
 
     def empty(self):
@@ -455,7 +459,7 @@ class TaskMaster(object):
 
     def activate(self, id):
         """Move an item from the backlog to the top of the stack"""
-        active_item = self.backlog.remove(id)
+        active_item = self.backlog.get(id)
         self.stack.push(active_item)
 
 
