@@ -1,5 +1,6 @@
 .idea/
 .coverage*
+.conda/
 log.txt
 __pycache__/
 *.pyc

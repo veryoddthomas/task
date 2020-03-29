@@ -26,7 +26,8 @@ def process_command(args):
 
 def create_parser(subparsers):
     """Create argument subparser for command 'activate'"""
-    subparser = subparsers.add_parser('activate', help='Activate task from the backlog')
+    subparser = subparsers.add_parser('activate',
+                                      help='Activate task from the backlog')
     subparser.set_defaults(func=process_command)
     subparser.add_argument("-e", "--edit", action="store_true",
                            help="Invoke an editor for the task")
