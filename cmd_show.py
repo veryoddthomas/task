@@ -39,7 +39,7 @@ def print_tasks(tm):
         print("{}{}{}".format(tc.light_white, group_name, tc.end()))
         # print("=" * len(group_name))
         found = False
-        for task in group: # .find_all():
+        for task in group:  # .find_all():
             data = task.dict()
             print_task_summary(data, color)
             found = True

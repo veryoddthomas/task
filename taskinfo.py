@@ -64,7 +64,7 @@ class TasksInProgress(ISerializable):
     def __iter__(self):
         """Object iterator"""
         for item in self.stack:
-                yield item
+            yield item
 
     def push(self, task):
         """Push a task onto the stack"""
@@ -128,7 +128,7 @@ class TaskBacklog(ISerializable):
     def __iter__(self):
         """Object iterator"""
         for item in self.queue:
-                yield item
+            yield item
 
     def put(self, task):
         """Insert a task into the backlog"""
@@ -160,7 +160,8 @@ class TaskBacklog(ISerializable):
         raise LookupError("No such task in queue: '{}'".format(task_id))
 
     def remove(self, task_id):
-        """Searches for a task by 'task_id', removes it, and returns it. Uses prefix-matching."""
+        """Searches for a task by 'task_id', removes it, and returns it.
+           Uses prefix-matching."""
         task_obj = self.find(task_id)
         self.queue.remove(task_obj)
         return task_obj
@@ -201,7 +202,7 @@ class TaskLimbo(object):
     def __iter__(self):
         """Object iterator"""
         for item in self._blocked_items:
-                yield item
+            yield item
 
     def block(self, item, blocked_by):
         """Stores 'item' internally, indexed by 'blocked_by'"""
@@ -251,7 +252,7 @@ class TaskDorm(ISerializable):
     def __iter__(self):
         """Object iterator"""
         for item in self._queue:
-                yield item
+            yield item
 
     def sleep(self, item, duration):
         """Put 'item' to sleep for datetime.timedelta 'duration'"""
@@ -461,7 +462,6 @@ class TaskMaster(object):
         """Move an item from the backlog to the top of the stack"""
         active_item = self.backlog.get(id)
         self.stack.push(active_item)
-
 
     def sleep(self, duration):
         """Puts the active item to sleep for timedelta 'duration'"""
