@@ -49,7 +49,7 @@ class MyFormatter(logging.Formatter):
             else:
                 result = result.replace(COLOR_START_MARKER,
                                         COLOR.dark_white)
-        result = result.replace(COLOR_END_MARKER, COLOR.end())
+        result = result.replace(COLOR_END_MARKER, COLOR.end)
         return result
 
 

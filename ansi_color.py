@@ -96,7 +96,7 @@ class TermColor(object):
             return ""
         return '\033[{}m'.format(color)
 
-    def end(self):
+    def reset(self):
         """Generate ANSI escape sequence to reset color to default"""
         if self.strip_codes:
             return ""
@@ -262,15 +262,12 @@ class TermColor(object):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(WHITE)))
 
+    @property
+    def end(self):
+        return self.reset()
+
 
 if __name__ == '__main__':
     # pylint: disable=fixme
-    # TODO: move this to a proper unit test
-    TERM_COLOR = TermColor()
-    print(TERM_COLOR.light_black + "HELLO FG LIGHT BLACK" + TERM_COLOR.end())
-    print(TERM_COLOR.light_red + "HELLO FG LIGHT RED" + TERM_COLOR.end())
-
-    print(TERM_COLOR.light_yellow + TERM_COLOR.light_black_bg +
-          "HELLO - FG LIGHT YELLOW - BG LIGHT BLACK" + TERM_COLOR.end())
-    print(TERM_COLOR.light_red + TERM_COLOR.light_black_bg +
-          "HELLO - FG LIGHT RED - BG LIGHT BLACK" + TERM_COLOR.end())
+    c = TermColor()
+    print(f"{c.light_red}{c.light_black_bg}Hello{c.end} there")

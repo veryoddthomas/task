@@ -22,7 +22,7 @@ def print_task_summary(task_data, color=None):
         desc=task_data["description"],
         c1=color,
         c2=tc.light_black,
-        endc=tc.end()
+        endc=tc.end
         ))
 
 
@@ -36,7 +36,7 @@ def print_tasks(tm):
     ]
     # for struct in _structs
     for group_name, group, color in _task_groups:
-        print("{}{}{}".format(tc.light_white, group_name, tc.end()))
+        print("{}{}{}".format(tc.light_white, group_name, tc.end))
         # print("=" * len(group_name))
         found = False
         for task in group:  # .find_all():
