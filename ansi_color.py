@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Helper module for simple generation of ANSI escape sequences used for terminal
@@ -94,13 +94,18 @@ class TermColor(object):
         """Generate ANSI escape sequence to set color"""
         if self.strip_codes:
             return ""
-        return '\033[{}m'.format(color)
+        return f'\033[{color}m'
 
     def reset(self):
         """Generate ANSI escape sequence to reset color to default"""
         if self.strip_codes:
             return ""
-        return '\033[{}m'.format(RESET)
+        return f'\033[{RESET}m'
+
+    @property
+    def end(self):
+        """Generate ANSI escape sequence to reset color to default"""
+        return self.reset()
 
     @property
     def dark_black(self):
@@ -261,10 +266,6 @@ class TermColor(object):
     def light_white_bg(self):
         """Generate ANSI escape sequence to set color to named value"""
         return self.start(light(bg(WHITE)))
-
-    @property
-    def end(self):
-        return self.reset()
 
 
 if __name__ == '__main__':

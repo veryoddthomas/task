@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Test cases for taskinfo.py
@@ -13,7 +13,7 @@ import taskinfo
 
 def identify(testobj):
     """Identify running test in log"""
-    print("\n{}\n{}\n{}".format("="*72, testobj.id().split('.')[-1], "="*72))
+    print(f"\n{'='*72}\n{testobj.id().split('.')[-1]}\n{'='*72}")
 
 # @patch('os.path.exists')
 # @patch('os.makedirs')
@@ -45,15 +45,15 @@ class TestTaskInfo(unittest.TestCase):
     def test_taskinfo_add_build(self):
         """Test TaskInfo creation for a Build task"""
         self.task = taskinfo.TaskInfo('Do the first thing', 'Build')
-        print("task id = {}".format(self.task.id))
-        print("task type = {}".format(self.task.type))
+        print(f"task id = {self.task.id}")
+        print(f"task type = {self.task.type}")
         self.assertEqual(self.task.description, 'Do the first thing')
 
     def test_taskinfo_add_test(self):
         """Test TaskInfo creation for a Test task"""
         self.task = taskinfo.TaskInfo('Do the second thing', 'Test')
-        print("task id = {}".format(self.task.id))
-        print("task type = {}".format(self.task.type))
+        print(f"task id = {self.task.id}")
+        print(f"task type = {self.task.type}")
         self.assertEqual(self.task.description, 'Do the second thing')
 
 
@@ -85,7 +85,7 @@ class TestTasksInProgress(unittest.TestCase):
                       taskinfo.TaskPriority.CRITICAL,
                       taskinfo.TaskPriority.SHOWSTOPPER]
         for i in range(0, 10):
-            task = taskinfo.TaskInfo('Task #{}'.format(i), 'build')
+            task = taskinfo.TaskInfo(f"Task #{i}", 'build')
             task.type = types[i % len(types)]
             task.set_priority(priorities[i])
             self.tasks_in_progress.push(task)
@@ -104,11 +104,11 @@ class TestTasksInProgress(unittest.TestCase):
 #         """Tear down after test cases"""
 #         shutil.rmtree(self.test_dir, ignore_errors=True)
 #
-#     def test_process_command_add_build(self):  # pylint: disable=no-self-use
+#     def test_process_command_add_build(self):
 #         """Test the 'add' command for a Build task"""
 #         cmd_add.process_command({type: 'Build'})
 #
-#     def test_process_command_add_test(self):  # pylint: disable=no-self-use
+#     def test_process_command_add_test(self):
 #         """Test the 'add' command for a Test task"""
 #         cmd_add.process_command({type: 'Test'})
 

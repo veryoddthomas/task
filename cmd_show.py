@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Command to show a task
@@ -27,6 +27,7 @@ def print_task_summary(task_data, color=None):
 
 
 def print_tasks(tm):
+    """Print tasks grouped by type"""
     tc = TermColor()
     _task_groups = [
         ("Active Tasks", tm.stack, tc.light_green),
@@ -36,7 +37,7 @@ def print_tasks(tm):
     ]
     # for struct in _structs
     for group_name, group, color in _task_groups:
-        print("{}{}{}".format(tc.light_white, group_name, tc.end))
+        print(f"{tc.light_white}{group_name}{tc.end}")
         # print("=" * len(group_name))
         found = False
         for task in group:  # .find_all():
@@ -54,7 +55,7 @@ def process_command(args):
             print_tasks(taskmaster)
             return
 
-        stack_size = len(taskmaster.stack)
+        # stack_size = len(taskmaster.stack)
         if args.id is None:
             cur_task = taskmaster.current_task
         else:

@@ -93,7 +93,7 @@ class TasksInProgress(ISerializable):
             if task_obj.id.startswith(task_id):
                 return task_obj
 
-        raise LookupError("No such task in stack: '{}'".format(task_id))
+        raise LookupError(f"No such task in stack: '{task_id}'")
 
     def serialize(self, to_file=None):
         """Saves the stack to 'to_file'"""
@@ -157,7 +157,7 @@ class TaskBacklog(ISerializable):
             if task_obj.id.startswith(task_id):
                 return task_obj
 
-        raise LookupError("No such task in queue: '{}'".format(task_id))
+        raise LookupError(f"No such task in queue: '{task_id}'")
 
     def remove(self, task_id):
         """Searches for a task by 'task_id', removes it, and returns it.
@@ -213,8 +213,8 @@ class TaskLimbo(object):
 
         blocked_items = self._blockers.get(blocked_by, set())
         if item_meta in blocked_items:
-            raise ValueError("'{}' is already blocked by '{}'".format(
-                str(item_meta.data), str(blocked_by)))
+            raise ValueError(f"'{str(item_meta.data)}' " +
+                             f"is already blocked by '{str(blocked_by)}'")
 
         blocked_items.add(item_meta)
         self._blockers[blocked_by] = blocked_items
@@ -237,7 +237,7 @@ class TaskLimbo(object):
             if task_obj.id.startswith(task_id):
                 return task_obj
 
-        raise LookupError("No such task in limbo: '{}'".format(task_id))
+        raise LookupError(f"No such task in limbo: '{task_id}'")
 
 
 class TaskDorm(ISerializable):
@@ -258,8 +258,9 @@ class TaskDorm(ISerializable):
         """Put 'item' to sleep for datetime.timedelta 'duration'"""
         if not isinstance(duration, datetime.timedelta):
             raise TypeError(
-                "timestamp must be a timedelta object (given '{}')"
-                .format(str(type(duration))))
+                "timestamp must be a timedelta object (given '" +
+                str(type(duration)) +
+                "')")
 
         wake_at = datetime.datetime.now() + duration
         self.wake_at(item, wake_at)
@@ -268,8 +269,9 @@ class TaskDorm(ISerializable):
         """Put 'item' to sleep until 'timestamp'"""
         if not isinstance(timestamp, datetime.datetime):
             raise TypeError(
-                "timestamp must be a datetime object (given '{}')"
-                .format(str(type(timestamp))))
+                f"timestamp must be a datetime object (given '" +
+                str(type(timestamp)) +
+                "')")
 
         self._queue.put(item, timestamp)
 
@@ -301,7 +303,7 @@ class TaskDorm(ISerializable):
             if task_obj.id.startswith(task_id):
                 return task_obj
 
-        raise LookupError("No such task in dorm: '{}'".format(task_id))
+        raise LookupError(f"No such task in dorm: '{task_id}'")
 
     def set_callback(self, callback):
         """Sets the internal callback"""
@@ -421,7 +423,7 @@ class TaskMaster(object):
             if task_obj.id.startswith(task_id):
                 return task_obj
 
-        raise LookupError("No such task: '{}'".format(task_id))
+        raise LookupError(f"No such task: '{task_id}'")
 
     def active_item(self, remove=True):
         """Returns the active item"""
@@ -558,8 +560,8 @@ class TaskInfo(ISerializable):
         # FIXME - workaround for Enum issues
         # if not isinstance(priority, TaskPriority):
         if not isinstance(priority, int):
-            raise TypeError("Invalid priority '{}' of type '{}'".format(
-                str(priority), str(type(priority))))
+            raise TypeError(f"Invalid priority '{str(priority)}' " +
+                            f"of type '{str(type(priority))}'")
 
         self.priority = priority
 
@@ -615,8 +617,8 @@ class TaskInfo(ISerializable):
                 except TaskSyntaxError as e:
                     input(
                         # pylint: disable=line-too-long
-                        "Task syntax error (enter returns to editor): {}".format(  # nopep8
-                            str(e)))
+                        f"Task syntax error (enter returns to editor): " +
+                        str(e))
                     os.system(" ".join(editor_cmd))
                     continue
         finally:
@@ -637,14 +639,14 @@ class TaskInfo(ISerializable):
 
             value = TaskInfo._dpop(task_dict, key)
             lines.extend([
-                "# {}:".format(key),
+                f"# {key}:",
                 "# {}".format("\n#".join(value.splitlines())),
                 "",
             ])
 
         for key in sorted(task_dict.keys()):
             lines.extend([
-                "{}:".format(key),
+                f"{key}:",
                 str(task_dict[key]),
                 "",
             ])
@@ -695,7 +697,7 @@ class TaskInfo(ISerializable):
                 field_name = line[:-1]
                 if field_name in TaskInfo._READ_ONLY_FIELDS:
                     raise TaskSyntaxError(
-                        "'{}' field is read-only".format(field_name))
+                        "'{field_name}' field is read-only")
 
                 blank_line = False
                 continue
@@ -749,7 +751,7 @@ class TaskInfo(ISerializable):
     @staticmethod
     def _filename(task_id):
         """Constructs task filename from 'task_id'"""
-        return "{}.json".format(task_id)
+        return f"{task_id}.json"
 
     @property
     def filename(self):
